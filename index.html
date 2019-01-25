@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Kirk Slider</title>
+    <style>
+      div.background{ 
+        background-image: url('background.jpg');
+        background-repeat: no-repeat;
+        width:1200px;
+        height:800px;
+        margin: auto;
+        position: relative;
+      }
+      #face {
+        position: absolute;
+        top:167px;
+        left:528px;
+      }
+      .controls {
+        margin: 30px auto 20px auto;
+        text-align: center;
+      }
+      #percentage {
+        display: inline-block;
+        width:100px;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="controls">
+      <input type="range" id="size" name="size" min="10" max="120" value="100">
+      <label id="percentage">100%</label>
+    </div>
+    <div class="background">
+        <img id="face" src="face.png"/>
+    </div>
+    
+    <script>
+      
+      var slider = document.getElementById("size");
+      var percentage = document.getElementById("percentage");
+      var face = document.getElementById("face");
+
+      slider.addEventListener("input", function(){
+        percentage.innerText = slider.value + "%";
+        face.style.transform = "scale(" + (slider.value/100) + "," + (slider.value/100) + ")";
+      })
+
+    </script>
+  </body>
+</html>
