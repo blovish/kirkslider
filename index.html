@@ -52,14 +52,19 @@
     var face = document.getElementById("face");
     var sound = document.getElementById("sound");
 
-    var clip = new Howl({
-      src: ['kirk.mp3'],
-      volume: 0.5
-    });
+    var clip;
 
     slider.addEventListener("input", function () {
       percentage.innerText = slider.value + "%";
       face.style.transform = "scale(" + (slider.value / 100) + "," + (slider.value / 100) + ")";
+
+      if (!clip) {
+        clip = new Howl({
+        src: ['kirk.mp3'],
+        volume: 0.5
+        });
+      }
+
       clip.stop();
       if (sound.checked) {
         clip.rate(1 / ((parseInt(slider.value) + 60) / 160));
