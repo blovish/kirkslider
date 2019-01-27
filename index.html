@@ -1,52 +1,73 @@
 <!DOCTYPE html>
 <html>
-  <head>
-    <!-- Charlie Kirk Sucks -->
-    <title>Kirk Slider</title>
-    <style>
-      div.background{ 
-        background-image: url('background.jpg');
-        background-repeat: no-repeat;
-        width:1200px;
-        height:800px;
-        margin: auto;
-        position: relative;
-      }
-      #face {
-        position: absolute;
-        top:167px;
-        left:528px;
-      }
-      .controls {
-        margin: 30px auto 20px auto;
-        text-align: center;
-      }
-      #percentage {
-        display: inline-block;
-        width:100px;
-      }
-    </style>
-  </head>
-  <body>
-    <div class="controls">
-      <input type="range" id="size" name="size" min="10" max="120" value="100">
-      <label id="percentage">100%</label>
-    </div>
-    <div class="background">
-        <img id="face" src="face.png"/>
-    </div>
-    
-    <script>
-      
-      var slider = document.getElementById("size");
-      var percentage = document.getElementById("percentage");
-      var face = document.getElementById("face");
 
-      slider.addEventListener("input", function(){
-        percentage.innerText = slider.value + "%";
-        face.style.transform = "scale(" + (slider.value/100) + "," + (slider.value/100) + ")";
-      })
+<head>
+  <!-- Charlie Kirk Sucks -->
+  <title>Kirk Slider</title>
+  <script src="howler.min.js"></script>
+  <style>
+    .background{ 
+      background-image: url('background.jpg');
+      width:1200px;
+      height:800px;
+      margin: auto;
+      position: relative;
+    }
+    #face {
+      position: absolute;
+      top:167px;
+      left:528px;
+    }
+    .controls {
+      margin: 30px auto 20px auto;
+      text-align: center;
+    }
+    #size {
+      width:300px;
+    }
+    #percentage {
+      display: inline-block;
+      width:100px;
+    }
+    #sound {
+      margin-right: 20px;
+    }
+  </style>
+</head>
 
-    </script>
-  </body>
+<body>
+  <div class="controls">
+    <label for="sound">Sound</label>
+    <input type="checkbox" id="sound" name="sound">
+    <input type="range" id="size" name="size" min="10" max="120" value="100">
+    <label id="percentage">100%</label>
+  </div>
+  <div class="background">
+    <img id="face" src="face.png" />
+  </div>
+  <script>
+
+    var slider = document.getElementById("size");
+    var percentage = document.getElementById("percentage");
+    var face = document.getElementById("face");
+    var sound = document.getElementById("sound");
+
+    var clip = new Howl({
+      src: ['kirk.ogg'],
+      volume: 0.5
+    });
+
+    slider.addEventListener("input", function () {
+      percentage.innerText = slider.value + "%";
+      face.style.transform = "scale(" + (slider.value / 100) + "," + (slider.value / 100) + ")";
+      clip.stop();
+      if (sound.checked) {
+        clip.rate(1 / ((parseInt(slider.value) + 60) / 160));
+        clip.play();
+      }
+    });
+
+  </script>
+</body>
+
 </html>
