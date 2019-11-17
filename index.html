@@ -4,76 +4,170 @@
 <head>
   <!-- Charlie Kirk Sucks -->
   <title>Kirk Slider</title>
-  <meta name="description" content="A slider to change the size of Charlie Kirk's face from 10% to 120%">
+  <meta name="description" content="A set of controls to change the size and position of Charlie Kirk's face">
   <meta name="keywords" content="Charlie Kirk,Charlie Kirk Face,TPUSA,Toilet Paper USA,I Live Like a Capitalist Every Single Day">
   <script src="howler.min.js"></script>
   <style>
-    .background{ 
+    .background {
       background-image: url('background.jpg');
-      width:1200px;
-      height:800px;
+      width: 1200px;
+      height: 800px;
       margin: auto;
       position: relative;
     }
     #face {
       position: absolute;
-      top:167px;
-      left:528px;
+      top: 167px;
+      left: 528px;
     }
-    .controls {
-      margin: 30px auto 20px auto;
+    /* Trying to center the controls without Flexbox... */
+    #controls-outer {
       text-align: center;
+      margin-bottom: 25px;
     }
-    #size {
-      width:300px;
-    }
-    #percentage {
+    #controls-inner {
       display: inline-block;
-      width:100px;
+      height: 50px;
     }
-    #sound {
-      margin-right: 20px;
+    .control {
+      float: left;
+      text-align: left;
+      width: 175px;
+      line-height: 2;
     }
   </style>
 </head>
 
 <body>
-  <div class="controls">
-    <label for="sound">Sound</label>
-    <input type="checkbox" id="sound" name="sound">
-    <input type="range" id="size" name="size" min="10" max="120" value="100">
-    <label id="percentage">100%</label>
+  <div id="controls-outer">
+    <div id="controls-inner">
+      <div class="control">
+        <label id="widthLabel" for="width">Width: 100%</label>
+        <input id="width" type="range" name="width" min="10" max="120" value="100">
+      </div>
+
+      <div class="control">
+        <label id="heightLabel" for="height">Height: 100%</label>
+        <input id="height" type="range" name="height" min="10" max="120" value="100">
+      </div>
+
+      <div class="control">
+        <label id="upLabel" for="up">Up/Down: 0%</label>
+        <input id="up" type="range" name="up" min="-100" max="100" value="0">
+      </div>
+
+      <div class="control">
+        <label id="leftLabel" for="left">Left/Right: 0%</label>
+        <input id="left" type="range" name="left" min="-100" max="100" value="0">
+      </div>
+
+      <div class="control">
+        <label id="rotateLabel" for="rotate">Rotation: 0&#176</label>
+        <input id="rotate" type="range" name="rotate" min="-180" max="180" value="0">
+      </div>
+
+      <div class="control soundControl">
+        <label for="sound">Sound</label>
+        <input type="checkbox" id="sound" name="sound">
+      </div>
+    </div>
   </div>
   <div class="background">
     <img id="face" src="face.png" />
   </div>
   <script>
+    var widthLabel = document.getElementById("widthLabel");
+    var widthInput = document.getElementById("width");
 
-    var slider = document.getElementById("size");
-    var percentage = document.getElementById("percentage");
+    var heightLabel = document.getElementById("heightLabel");
+    var heightInput = document.getElementById("height");
+
+    var upLabel = document.getElementById("upLabel");
+    var upInput = document.getElementById("up");
+
+    var leftLabel = document.getElementById("leftLabel");
+    var leftInput = document.getElementById("left");
+
+    var rotateLabel = document.getElementById("rotateLabel");
+    var rotateInput = document.getElementById("rotate");
+
     var face = document.getElementById("face");
     var sound = document.getElementById("sound");
 
     var clip;
 
-    slider.addEventListener("input", function () {
-      percentage.innerText = slider.value + "%";
-      face.style.transform = "scale(" + (slider.value / 100) + "," + (slider.value / 100) + ")";
+    function formatPercentLabel(label, prefix, input) {
+      label.innerText = prefix + ": " + Math.round(input * 100) + "%";
+    }
+
+    function parsePercent(value) {
+      return Number(value) / 100;
+    }
+
+    function toPercentile(value, bounds) {
+      return (value - bounds[0]) / (bounds[1] - bounds[0]);
+    }
+
+    function adjustBounds(originalSize, originalBounds, scale) {
+      var adjustment = originalSize * (1 - scale) / 2;
+      return [originalBounds[0] - adjustment, originalBounds[1] + adjustment];
+    }
+
+    function fromPercentile(percentile, bounds) {
+      return percentile * (bounds[1] - bounds[0]) + bounds[0]
+    }
+
+    function update() {
+      var width = parsePercent(widthInput.value);
+      var height = parsePercent(heightInput.value);
+      var up = parsePercent(upInput.value);
+      var left = parsePercent(leftInput.value);
+      var rotate = Number(rotateInput.value);
+
+      formatPercentLabel(widthLabel, "Width", width);
+      formatPercentLabel(heightLabel, "Height", height);
+      formatPercentLabel(upLabel, "Up/Down", up);
+      formatPercentLabel(leftLabel, "Left/Right", left);
+      rotateLabel.innerHTML = "Rotate: " + rotate + "&#176";
+
+      // Slider goes from -100 to 100, but we really just want 0 to 1
+      var upFraction = toPercentile(up, [-1, 1]);
+      var leftFraction = toPercentile(left, [-1, 1]);
+
+      // These values measured by looking at the image dimensions
+      var adjustedUpBounds = adjustBounds(221, [-60, 40], height);
+      var adjustedLeftBounds = adjustBounds(226, [-30, 30], width);
+
+      var normalizedUp = fromPercentile(upFraction, adjustedUpBounds);
+      var normalizedLeft = fromPercentile(leftFraction, adjustedLeftBounds);
+
+      var scale = "scale(" + width + "," + height + ")";
+      var translate = "translate(" + normalizedLeft + "px," + normalizedUp + "px)";
+      var rotate = "rotate(" + rotate + "deg)";
+      face.style.transform = [translate, scale, rotate].join(" ");
 
       if (!clip) {
         clip = new Howl({
-        src: ['kirk.mp3'],
-        volume: 0.5
+          src: ['kirk.mp3'],
+          volume: 0.5
         });
       }
 
       clip.stop();
       if (sound.checked) {
-        clip.rate(1 / ((parseInt(slider.value) + 60) / 160));
+        // Scale the speed of the sound by the geometric mean of width and height.
+        // Translation shouldn't affect the speed.
+        var rate = 1.6 / (Math.sqrt(width * height) + 0.6);
+        clip.rate(rate);
         clip.play();
       }
-    });
+    }
 
+    widthInput.addEventListener("input", update);
+    heightInput.addEventListener("input", update);
+    upInput.addEventListener("input", update);
+    leftInput.addEventListener("input", update);
+    rotateInput.addEventListener("input", update);
   </script>
 </body>
 
