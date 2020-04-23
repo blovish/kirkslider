@@ -19,6 +19,7 @@
       position: absolute;
       top:167px;
       left:528px;
+      transform: scale(0.9);
     }
     .controls {
       margin: 30px auto 20px auto;
@@ -41,7 +42,7 @@
   <div class="controls">
     <label for="sound">Sound</label>
     <input type="checkbox" id="sound" name="sound">
-    <input type="range" id="size" name="size" min="10" max="120" value="100">
+    <input type="range" id="size" name="size" min="10" max="130" value="100">
     <label id="percentage">100%</label>
   </div>
   <div class="background">
@@ -58,7 +59,8 @@
 
     slider.addEventListener("input", function () {
       percentage.innerText = slider.value + "%";
-      face.style.transform = "scale(" + (slider.value / 100) + "," + (slider.value / 100) + ")";
+      var value=(slider.value/100)*90;
+      face.style.transform = "scale(" + (value / 100) + "," + (value / 100) + ")";
 
       if (!clip) {
         clip = new Howl({
